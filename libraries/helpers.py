@@ -38,6 +38,27 @@ class inMemoryFileReader:
         self.baseOffset = offsets[0]
         self.currentOffset = offsets[1]
 
+class bitReader: #Ripped out of (and modified from) the LZB script for convenience
+    def __init__(self, data):
+        self.bitStreamOffset = 0 #Where the reader is in the stream (in bytes)
+        self.bitOffset = 8       #Where where the bit reader is in a byte
+        self.data = data         #The data to read
+
+    def getBit(self): #Gets a single bit from the bit stream
+        self.bitOffset -= 1
+        if self.bitOffset == 0:
+            self.bitStreamOffset += 1
+            self.bitOffset = 8
+        
+        currentByte = self.data[self.bitStreamOffset]
+        bit = (currentByte >> (self.bitOffset - 1)) & 0x1
+        return bit
+
+    def readBits(self, count): #Reads a specific number of bits and returns their value
+        value = 0
+        for bitIndex in range(count):
+            value = (value << 1) | self.getBit()
+
 def LE_Integer(data, mode=0, length=0):
     if mode == 0:
         value = 0

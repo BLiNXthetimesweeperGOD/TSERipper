@@ -90,6 +90,17 @@ def decodeBGR555(color):
     
     return (red, green, blue, 255)
 
+def decodeBGRX4444(color): #The Leapster formats use this one
+    red   = color >> 4    & 0xF
+    green = (color >> 8)  & 0xF
+    blue  = (color >> 12) & 0xF
+
+    red   = (red   << 4) | red
+    green = (green << 4) | green
+    blue  = (blue  << 4) | blue
+
+    return (red, green, blue, 255)
+
 def getPalettes(GBA, offset):
     colorPalettes = []
     
