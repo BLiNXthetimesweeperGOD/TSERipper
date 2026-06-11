@@ -25,9 +25,9 @@ LeapFrog:
 - Cars
 - Cars: Supercharged
 - Didji Racing: Tiki Tropics (has debug symbols!)
+- Go, Diego, Go! Animal Rescuer
 - NASCAR
 - Sonic X
-- Go, Diego, Go! Animal Rescuer
 
 GBA:
 - Backyard Football
