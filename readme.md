@@ -19,3 +19,47 @@ If anything from the console games gets supported, it'll just be the PACKFILE co
 - RLE sprites (found in their LeapFrog games)
 - GBA music and sound effects (specifically their format, I will not add support for GAX)
 - LZB compression (for when I eventually add support for level maps)
+
+# List of games that use this engine
+LeapFrog:
+- Cars
+- Cars: Supercharged
+- Didji Racing: Tiki Tropics (has debug symbols!)
+- NASCAR
+- Sonic X
+- Go, Diego, Go! Animal Rescuer
+
+GBA:
+- Backyard Football
+- Backyard Football 2006
+- Backyard Sports Football 2007
+- Cabela's Big Game Hunter 2005 Adventures
+- Curious George
+- Dead to Rights
+- Doom II
+- Duke Nukem Advance
+- Fantastic 4
+- Fantastic 4: Flame On
+- Gumby vs. the Astrobots
+- Ice Nine
+- Jackie Chan Adventures: Legend of the Dark Hand
+- Minority Report: Everybody Runs
+- Pitfall: the Lost Expedition
+- Planet of the Apes
+- Rapala Pro Fishing
+- Shrek Smash n' Crash Racing
+- Space Invaders
+- Sportsmans Pack: Cabela's Big Game Hunter + Rapala Pro Fishing
+- The Invincible Iron Man
+
+DS:
+- Barbie: Dreamhouse Party
+- Indianapolis 500 Legends
+- Madagascar 3
+- Monster High: 13 Wishes
+- Monster Jam: Urban Assault
+- Rise of the Guardians
+- Scooby-Doo! and the Spooky Swamp
+- Shrek Smash n' Crash Racing
+- The Croods: Prehistoric Party
+- Turbo: Super Stunt Squad
