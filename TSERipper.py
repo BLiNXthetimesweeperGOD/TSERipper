@@ -3,6 +3,7 @@ from libraries.helpers import *
 from libraries.formats.DPAK import *
 from libraries.formats.audio.MUSC import *
 from libraries.formats.graphics.GBASprite import *
+from libraries.formats.graphics.RLESprite import *
 
 try:
     from libraries.formats.NDS import *
@@ -29,6 +30,11 @@ for file in files:
                     convertMUSC(section, romName)
                 if section.startswith(b'\x03\x00\x01\x00') or section.startswith(b'\x04\x00\x01\x00'):
                     decodeGBASprite(section, romName, index)
+                if section.startswith(b'SPRT'):
+                    if "numbers" in file.lower() or "zero" in file.lower() or "zro" in file.lower():
+                        decodeRLESprite(section, romName, index, 0)
+                    else:
+                        decodeRLESprite(section, romName, index, 1)
                 index+=1
                     
     if "nds" in file.lower():

@@ -18,6 +18,9 @@ class imageBuilder:
             for x in range(self.width):
                 self.image.putpixel((x, y), pixels[y * self.width + x])
 
+    def drawPixel(self, pixel, xLocation, yLocation): #Used by the RLE formats
+        self.image.putpixel((xLocation, yLocation), pixel)
+
     def horizontalFlip(): #To-do (needed for level map rips)
         ""
 
@@ -90,16 +93,16 @@ def decodeBGR555(color):
     
     return (red, green, blue, 255)
 
-def decodeBGRX4444(color): #The Leapster formats use this one
-    red   = color >> 4    & 0xF
-    green = (color >> 8)  & 0xF
-    blue  = (color >> 12) & 0xF
+def decodeXBGR4444(color): #The Leapster formats use this one
+    red   = color         & 0xF
+    green = (color >> 4)  & 0xF
+    blue  = (color >> 8)  & 0xF
 
-    red   = (red   << 4) | red
-    green = (green << 4) | green
-    blue  = (blue  << 4) | blue
+    red   = (red   << 4)
+    green = (green << 4)
+    blue  = (blue  << 4)
 
-    return (red, green, blue, 255)
+    return (blue, green, red, 255)
 
 def getPalettes(GBA, offset):
     colorPalettes = []
