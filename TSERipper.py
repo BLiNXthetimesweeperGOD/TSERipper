@@ -2,8 +2,10 @@
 from libraries.helpers import *
 from libraries.formats.DPAK import *
 from libraries.formats.audio.MUSC import *
-from libraries.formats.graphics.GBASprite import *
-from libraries.formats.graphics.RLESprite import *
+from libraries.formats.graphics.spritesGBA import *
+from libraries.formats.graphics.spritesRLE import *
+from libraries.formats.graphics.levelMaps  import *
+from libraries.formats.graphics.trackMaps  import *
 
 try:
     from libraries.formats.NDS import *
@@ -26,15 +28,19 @@ for file in files:
         if sectionData:
             for section in sectionData:
                 #print(section[0:4])
-                if section.startswith(b'MUSC'): #Music (GBA-exclusive, MOD-based)
+                if section.startswith(b'MUSC'): #Music and sound effects (GBA-exclusive, MOD-based)
                     convertMUSC(section, romName)
+                if section[4:8] == b'\x03\x00\x01\x00' or section[4:8] == b'\x04\x00\x01\x00':
+                    decodeLevelMaps(section, romName, index)
                 if section.startswith(b'\x03\x00\x01\x00') or section.startswith(b'\x04\x00\x01\x00'):
-                    decodeGBASprite(section, romName, index)
+                    decodeGBASprites(section, romName, index)
                 if section.startswith(b'SPRT'):
                     if "numbers" in file.lower() or "zero" in file.lower() or "zro" in file.lower():
-                        decodeRLESprite(section, romName, index, 0)
+                        decodeRLESprites(section, romName, index, 0)
                     else:
-                        decodeRLESprite(section, romName, index, 1)
+                        decodeRLESprites(section, romName, index, 1)
+                if section.startswith(b'MDE7'): #Race track map format
+                    decodeTrackMaps(section, romName, index)      
                 index+=1
                     
     if "nds" in file.lower():
@@ -42,7 +48,7 @@ for file in files:
         for entry in DSFiles:
             if "sprites" in entry:
                 if DSFiles[entry].startswith(b'\x04\x00\x01\x00'):
-                    decodeGBASprite(DSFiles[entry], romName, index)
+                    decodeGBASprites(DSFiles[entry], romName, index)
             index+=1
     
     
