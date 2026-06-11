@@ -15,6 +15,7 @@ If anything from the console games gets supported, it'll just be the PACKFILE co
 
 # Supported formats
 - DPAK containers (found in most of their games from before the DS)
-- Sprites (work in progress - very buggy)
+- GBA sprites (work in progress - very buggy)
+- RLE sprites (found in their LeapFrog games)
 - GBA music and sound effects (specifically their format, I will not add support for GAX)
 - LZB compression (for when I eventually add support for level maps)
