@@ -18,6 +18,7 @@ If anything from the console games gets supported, it'll just be the PACKFILE co
 - GBA sprites (work in progress - very buggy)
 - RLE sprites (found in their LeapFrog games)
 - GBA music and sound effects (specifically their format, I will not add support for GAX)
+- Level maps (work in progress - some come out broken)
 - LZB compression (for when I eventually add support for level maps)
 
 # List of games that use this engine
