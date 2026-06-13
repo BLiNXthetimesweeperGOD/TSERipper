@@ -19,10 +19,9 @@ os.chdir(scriptPath)
 
 files = dialog("files").paths
 
-index = 0
-
 for file in files:
     romName = os.path.basename(file).split(".")[0]
+    index = 0
     if "gba" in file.lower() or "bin" in file.lower():
         sectionData = DPAK(file)
         if sectionData:
@@ -34,11 +33,14 @@ for file in files:
                     decodeLevelMaps(section, romName, index)
                 if section.startswith(b'\x03\x00\x01\x00') or section.startswith(b'\x04\x00\x01\x00'):
                     decodeGBASprites(section, romName, index)
-                if section.startswith(b'SPRT'):
-                    if "numbers" in file.lower() or "zero" in file.lower() or "zro" in file.lower():
-                        decodeRLESprites(section, romName, index, 0)
-                    else:
-                        decodeRLESprites(section, romName, index, 1)
+                if section.startswith(b'SPRT') and len(section) > 1000: #The only format that converts perfectly at the moment
+                    try:
+                        if "numbers" in file.lower() or "zero" in file.lower() or "zro" in file.lower():
+                            decodeRLESprites(section, romName, index, 0)
+                        else:
+                            decodeRLESprites(section, romName, index, 1)
+                    except:
+                        "" #Errors only happen here when decoding empty or repurposed sections
                 if section.startswith(b'MDE7'): #Race track map format
                     decodeTrackMaps(section, romName, index)      
                 index+=1

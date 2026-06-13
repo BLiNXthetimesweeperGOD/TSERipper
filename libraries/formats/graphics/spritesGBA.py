@@ -28,89 +28,92 @@ def decodeGBASprites(data, romName, sectionIndex):
 
         savedReturnForNextSprite = GBA.tell() #Expect lots of this
 
-        try:
-            if spriteOffset != 0:
+        if spriteOffset != 0:
 
-                GBA.seek(spriteOffset)
+            GBA.seek(spriteOffset)
 
-                animationCount      = LE_Integer(GBA.read(2))
-                basePaletteIDOffset = LE_Integer(GBA.read(2))
-                GBA.read(4)
+            animationCount      = LE_Integer(GBA.read(2))
+            basePaletteIDOffset = LE_Integer(GBA.read(2))
+            GBA.read(4)
 
-                returnForAnimations = GBA.tell()
-                GBA.seek(spriteOffset+basePaletteIDOffset)
+            returnForAnimations = GBA.tell()
+            
+            firstAnimationOffset = LE_Integer(GBA.read(4)) + spriteOffset
+
+            paletteIDs = []
+            
+            GBA.seek(spriteOffset+basePaletteIDOffset)
+
+            for i in range(16):
+                paletteIDs.append(LE_Integer(GBA.read(2)))
+            
+            GBA.restore(returnForAnimations)
+
+            for animation in range(animationCount):
+                animationOffset = LE_Integer(GBA.read(4))
                 
-                basePaletteID = LE_Integer(GBA.read(2))
-                
-                GBA.restore(returnForAnimations)
+                savedReturnForNextAnimation = GBA.tell()
 
-                for animation in range(animationCount):
-                    animationOffset = LE_Integer(GBA.read(4))
+                GBA.seek(spriteOffset+animationOffset)
+                frameBase = GBA.tellExact()
+                frameCount, unknown = GBA.read(2)
+                playbackSpeed = LE_Integer(GBA.read(2))
+
+                for frame in range(frameCount):
+                    frameOffset = LE_Integer(GBA.read(4))
                     
-                    savedReturnForNextAnimation = GBA.tell()
+                    padding = LE_Integer(GBA.read(2)) #This is padding, it's always 0 (I checked)
 
-                    GBA.seek(spriteOffset+animationOffset)
-                    frameCount, unknown = GBA.read(2)
-                    playbackSpeed = LE_Integer(GBA.read(2))
+                    savedReturnForNextFrame = GBA.tell()
 
-                    for frame in range(frameCount):
-                        frameOffset = LE_Integer(GBA.read(4))
-                        GBA.read(2) #This is padding, it's always 0 (I checked)
-
-                        savedReturnForNextFrame = GBA.tell()
-
-                        GBA.seek(spriteOffset+animationOffset+frameOffset)
+                    GBA.seek(frameBase+frameOffset)
+                    #print(hex(frameBase+frameOffset))
+                    #input()
+                    
+                    chunkCount = LE_Integer(GBA.read(2))
+                    unknown1 = LE_Integer(GBA.read(2)) #Unknown, often 0 or 1. Sometimes 2.
+                    
+                    unknownX, unknownY = GBA.read(2) #Seems to be related to sprite size? Canvas size, maybe?
+                    alignX, alignY = GBA.read(2)
+                    XSize, YSize = GBA.read(2)
+                    
+                    spriteImage = imageBuilder(XSize*8, YSize*8)
+                    finalImage = imageBuilder(256, 256)
+                    GBA.read(2) #Unknown - always 04? Bits per pixel maybe?
+                    
+                    for chunk in range(chunkCount):
+                        startOfChunk = GBA.tellExact() #Possibly needed later (?)
                         
-                        chunkCount = LE_Integer(GBA.read(2))
-                        unknown1 = LE_Integer(GBA.read(2)) #Unknown, often 0 or 1. Sometimes 2.
+                        chunkAlignX, chunkAlignY = GBA.read(2)
                         
-                        unknownX, unknownY = GBA.read(2) #Seems to be related to sprite size? Canvas size, maybe?
-                        alignX, alignY = GBA.read(2)
-                        XSize, YSize = GBA.read(2)
+                        #print(chunkAlignX, chunkAlignY)
+                        chunkShape = getSizeInTiles((GBA.read(1)[0] & 0xF))
+                        
+                        chunkPalette = GBA.read(1)[0] & 0xF
+                        
+                        nextChunkOffset = GBA.read(1)[0]
+                        unknownVariable = GBA.read(1)[0] #usually 0x00, 0x08, 0x10, 0x20 or 0xCC
+                        
+                        chunkImage = imageBuilder(chunkShape[0]*8, chunkShape[1]*8)
+                        
+                        for y in range(chunkShape[1]):
+                            for x in range(chunkShape[0]):
+                                tile = decodeTile(readTile(GBA, trueTileDataStart, LE_Integer(GBA.read(2))), colorPalettes[paletteIDs[chunkPalette] % len(colorPalettes)])
+                                chunkImage.placeBlock(tile.image, x*8, y*8)
 
-                        #print(unknownX, unknownY, alignX, alignY, XSize, YSize)
+                        spriteImage.placeBlock(chunkImage.image, chunkAlignX, chunkAlignY)
+                        GBA.seek(startOfChunk+nextChunkOffset)
+                        #rint(hex(startOfChunk+nextChunkOffset))
                         #input()
                         
-                        spriteImage = imageBuilder(XSize*8, YSize*8)
-                        GBA.read(2) #Unknown - always 04? Bits per pixel maybe?
                         
-                        for chunk in range(chunkCount):
-                            startOfChunk = GBA.tell()[0]+GBA.tell()[1] #Possibly needed later (?)
-                            
-                            chunkAlignX, chunkAlignY = GBA.read(2)
-                            #print(chunkAlignX, chunkAlignY)
-                            chunkShape = getSizeInTiles(GBA.read(1)[0])
-                            if chunkShape == None:
-                                break
-                            chunkPalette = GBA.read(1)[0]
-
-                            if chunkPalette > 0xF:
-                                chunkPalette = chunkPalette & 0xF
-                                GBA.read(1)[0]
-                            chunkPalette = chunkPalette & 0xF
-                            
-                            nextChunkOffset = GBA.read(1)[0]
-                            GBA.read(1) #Unknown, usually 0x00, 0x08, 0x10, 0x20 or 0xCC
-                            
-                            chunkImage = imageBuilder(chunkShape[0]*8, chunkShape[1]*8)
-                            
-                            for y in range(chunkShape[1]):
-                                for x in range(chunkShape[0]):
-                                    tile = decodeTile(readTile(GBA, trueTileDataStart, LE_Integer(GBA.read(2))), colorPalettes[basePaletteID+chunkPalette])
-                                    chunkImage.placeBlock(tile.image, x*8, y*8)
-
-                            spriteImage.placeBlock(chunkImage.image, chunkAlignX, chunkAlignY)
-
-                            GBA.seek(startOfChunk+nextChunkOffset)
-                            
-                        if chunkShape != None:
-                            spriteImage.save(os.getcwd()+f"/output/{romName}/sprites/GBA/{sectionIndex:06}/{entry:04}/{animation:02}_{frame:02}.png")
-                        GBA.restore(savedReturnForNextFrame)
+                    if chunkShape != None:
+                        finalImage.placeBlock(spriteImage.image, (256 - alignX)//2, (256 - alignY)//2) #Expect alignment issues, I decreased the size to 256x256 for testing.
                         
-                    GBA.restore(savedReturnForNextAnimation)
-        except:
-            ""
-            #print(hex(GBA.tell()[0]))
+                        finalImage.save(os.getcwd()+f"/output/{romName}/sprites/GBA/{sectionIndex:06}/{entry:04}/{animation:02}_{frame:02}.png")
+                    GBA.restore(savedReturnForNextFrame)
+                    
+                GBA.restore(savedReturnForNextAnimation)
         GBA.restore(savedReturnForNextSprite)
 
 

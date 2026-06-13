@@ -8,6 +8,7 @@ import wave
 from libraries.utilities.XMLib import *
 
 #To-do: Add Space Invaders support
+#To-do: Find out what's causing the offset desync for module 4 of Pitfall before the pattern order table
 
 def saveWAV(data, sampleRate, filename):
     pcm = bytearray()

@@ -4,7 +4,7 @@ try:
     from PIL import Image
 except:
     input("Error! PIL isn't installed. You can install it with 'pip install pillow'.")
-
+    
 #I made a class for PIL so I can stick to 1 coding style across the main scripts
 class imageBuilder:
     def __init__(self, width, height):
@@ -16,19 +16,22 @@ class imageBuilder:
     def setPixels(self, pixels): #Mainly used for tiles and bitmap-style stuff
         for y in range(self.height):
             for x in range(self.width):
-                self.image.putpixel((x, y), pixels[y * self.width + x])
+                try:
+                    self.image.putpixel((x, y), pixels[y * self.width + x])
+                except:
+                    break
 
     def drawPixel(self, pixel, xLocation, yLocation): #Used by the RLE formats
         self.image.putpixel((xLocation, yLocation), pixel)
 
-    def horizontalFlip(): #To-do (needed for level map rips)
-        ""
+    def horizontalFlip(self):
+        self.image = self.image.transpose(method=Image.FLIP_LEFT_RIGHT)
 
-    def verticalFlip(): #To-do (needed for level map rips)
-        ""
+    def verticalFlip(self):
+        self.image = self.image.transpose(method=Image.FLIP_TOP_BOTTOM)
 
     def placeBlock(self, block, x, y): #Place a tile or a chunk
-        self.image.paste(block, (x, y))
+        self.image.paste(block, (x, y, x+block.width, y+block.height))
 
     def save(self, path): #Save the image
         if not os.path.exists(os.path.dirname(path)):
@@ -77,9 +80,32 @@ def getSizeInTiles(size): #Used for the sprite format's chunks
         9:  (1, 4),
         10: (2, 4),
         11: (4, 8),
-        
+        12: (0, 0), #The last few values are still set in the code but they're 0
+        13: (0, 0),
+        14: (0, 0),
+        15: (0, 0)
     }
     return sizeTable.get(size)
+
+#Raw size table for comparison:
+"""
+08 08 1x1
+10 10 2x2
+20 20 4x4
+40 40 8x8
+10 08 2x1
+20 08 4x1
+20 10 4x2
+40 20 8x4
+08 10 1x2
+08 20 1x4
+10 20 2x4
+20 40 4x8
+00 00 unused
+00 00 unused
+00 00 unused
+00 00 unused
+"""
 
 #Color functions
 def decodeBGR555(color):
